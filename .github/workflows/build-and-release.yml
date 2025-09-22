@@ -18,7 +18,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt update
-          sudo apt install build-essential device-tree-compiler python2.7
+          sudo apt install -y build-essential device-tree-compiler python2.7
           sudo -E systemctl daemon-reload
           sudo -E timedatectl set-timezone "Asia/Shanghai"
 
@@ -27,22 +27,14 @@ jobs:
           echo "COMPILE_DATE=$(TZ=UTC-8 date +"%y.%m.%d-%H.%M.%S")" >> $GITHUB_ENV
           echo "UBOOT_VERSION=$(TZ=UTC-8 date +"%y%m%d.%H%M%S")" >> $GITHUB_ENV
 
-      - name: Clone Code
-        run: |
-          git clone --depth=1 --single-branch --branch main https://github.com/chenxin527/uboot-ipq60xx-emmc-build.git
-
       - name: Compile U-Boot Full
         run: |
-          cd ./uboot-ipq60xx-emmc-build/
-
           ./build.sh
 
           mv openwrt-ipq6018-u-boot.mbn uboot-ipq60xx-emmc-full-"$UBOOT_VERSION".bin
 
       - name: Compile U-Boot Tiny
         run: |
-          cd ./uboot-ipq60xx-emmc-build/
-
           mv ./u-boot-2016/httpd/vendors/cleanwrt/ ./u-boot-2016/httpd/vendors/cleanwrt_full/
 
           mv ./u-boot-2016/httpd/vendors/cleanwrt_tiny/ ./u-boot-2016/httpd/vendors/cleanwrt/
@@ -55,5 +47,5 @@ jobs:
         uses: softprops/action-gh-release@master
         with:
           tag_name: ${{env.COMPILE_DATE}}
-          files: ./uboot-ipq60xx-emmc-build/uboot-ipq60xx-emmc-*.bin
-          body_path: ./uboot-ipq60xx-emmc-build/release_notes.md
+          files: ./uboot-ipq60xx-emmc-*.bin
+          body_path: ./release_notes.md
